@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
@@ -18,7 +20,10 @@ import com.sun.jersey.api.representation.Form;
 import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 
@@ -51,7 +56,7 @@ public class App
 		return String.valueOf( response.getStatus() );
 	}
 	
-	public int uploadFile(String schemaName, String actualSchema, String tableName, String pk, String fileName, String category, byte[] fileContent) {
+	public String uploadFile(String schemaName, String actualSchema, String tableName, String pk, String fileName, String category, byte[] fileContent) {
 		Client client = this.getClient();
 		
 		Form form = new Form();
@@ -68,21 +73,81 @@ public class App
 		ClientResponse response = webResource.
 		     type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
 		     .post(ClientResponse.class, form);
-		EntityTag e = response.getEntityTag();
+		
 	    String entity = response.getEntity(String.class);
 	    
 		if( response.getStatus() == 200) {	
 			JsonElement root = new JsonParser().parse(entity);
-			return root.getAsJsonObject().get("fileId").getAsInt();
+			return root.getAsJsonObject().get("fileId").getAsString();
 		}
 		
-		return -1;
+		return null;
 	}
 	
-	public int uploadFile(String schemaName, String actualSchema, String tableName, String pk, String fileName, String category, String fileSystemPath) throws IOException {
+	public String uploadFile(String schemaName, String actualSchema, String tableName, String pk, String fileName, String category, String fileSystemPath) throws IOException {
 		Path path = Paths.get(fileSystemPath);
 		byte[] fileContent = Files.readAllBytes(path);
 		return uploadFile(schemaName, actualSchema, tableName, pk, fileName, category, fileContent) ;
+	}
+	
+	public boolean setFileProperties(String schemaName, String actualSchema, String fileId, String properties, boolean merge) {
+		Client client = this.getClient();
+				
+		Form form = new Form();
+		form.add("schemaName", schemaName);
+		form.add("actualSchema", actualSchema);
+		form.add("fileId", fileId);
+		form.add("fileProperties", properties);
+		if(merge) 
+			form.add("merge", "1");
+		  
+		WebResource webResource = client.resource(this.url + "/cool/api/files/setProperties");   
+		
+		ClientResponse response = webResource.
+		     type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+		     .post(ClientResponse.class, form);
+		
+		return ( response.getStatus() == 200);
+	}
+	
+	public boolean setFileProperties(String schemaName, String actualSchema, String fileId, Map<String,String> properties, boolean merge) {
+		Gson gson = new GsonBuilder().create();
+		String json = gson.toJson(properties);
+		return setFileProperties(schemaName, actualSchema, fileId, json, merge);
+	}
+	
+	public JsonObject getFileProperties(String schemaName, String actualSchema, String fileId) {
+		Client client = this.getClient();
+		
+		Form form = new Form();
+		form.add("schemaName", schemaName);
+		form.add("actualSchema", actualSchema);
+		form.add("fileId", fileId);
+		  
+		WebResource webResource = client.resource(this.url + "/cool/api/files/getProperties");   
+		
+		ClientResponse response = webResource.
+		     type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+		     .post(ClientResponse.class, form);
+		
+		String entity = response.getEntity(String.class);
+	    
+		if( response.getStatus() == 200) {	
+			JsonElement root = new JsonParser().parse(entity);
+			return root.getAsJsonObject();
+		}
+		
+		return null;
+	}
+	
+	public Map<String,Object> getFilePropertiesAsMap(String schemaName, String actualSchema, String fileId) {
+		JsonObject jProps = getFileProperties(schemaName, actualSchema, fileId);
+		if(jProps != null) {
+			Map<String,Object> map = new LinkedHashMap<String,Object>();
+			map = (Map<String,Object>) new Gson().fromJson(jProps, Map.class);
+			return map;
+		}
+		return null;
 	}
 	
 	private Client getClient() {
