@@ -1,11 +1,14 @@
 package com.eulogix.cool.lib.pentaho;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.pentaho.di.core.CheckResult;
 import org.pentaho.di.core.CheckResultInterface;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleValueException;
@@ -22,6 +25,12 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 
 public abstract class CoolStepMeta extends BaseStepMeta implements StepMetaInterface {
@@ -63,6 +72,31 @@ public abstract class CoolStepMeta extends BaseStepMeta implements StepMetaInter
 	}
 
 	/**
+	 * builds a table data XML section
+	 * @param tagName
+	 * @param data
+	 * @return
+	 */
+	protected String getTableXML(String tagName, ArrayList<HashMap<String,String>> data) {
+		StringBuilder retval = new StringBuilder(300);
+		
+		retval.append( "    <" + tagName + ">" ).append( Const.CR );
+	    
+		for ( HashMap<String, String> line : data ) {
+			retval.append( "      <line> " );
+			
+			for (Map.Entry<String, String> entry : line.entrySet()) {
+			    retval.append( XMLHandler.addTagValue(entry.getKey(), entry.getValue() != null ? entry.getValue().toString() : null));
+			}
+	      
+	      retval.append( " </line>" ).append( Const.CR );
+	    }
+	    retval.append( "    </" + tagName + ">" ).append( Const.CR );
+	    
+	    return retval.toString();
+	}
+	
+	/**
 	 * This method is called by PDI when a step needs to load its configuration from XML.
 	 * 
 	 * Please use org.pentaho.di.core.xml.XMLHandler to conveniently read from the
@@ -84,6 +118,38 @@ public abstract class CoolStepMeta extends BaseStepMeta implements StepMetaInter
 		}
 
 	}	
+	
+	/**
+	 * returns a data structure from a xml node, used for grids
+	 * @param stepnode
+	 * @param tagName
+	 * @param databases
+	 * @param metaStore
+	 * @return
+	 * @throws KettleXMLException
+	 */
+	protected ArrayList<HashMap<String, String>> loadXMLTableData(Node stepnode, String tagName, List<DatabaseMeta> databases, IMetaStore metaStore) throws KettleXMLException {
+		ArrayList<HashMap<String, String>> ret = new ArrayList<HashMap<String, String>>();
+		
+		Node datanode = XMLHandler.getSubNode(stepnode, tagName);
+		Node lineNode = datanode.getFirstChild();
+		
+		while (lineNode != null) {
+			if ("line".equals(lineNode.getNodeName())) {
+				HashMap<String, String> line = new HashMap<String, String>();
+				Node itemNode = lineNode.getFirstChild();
+				while (itemNode != null) {
+					line.put(itemNode.getNodeName(),
+							XMLHandler.getNodeValue(itemNode));
+					itemNode = itemNode.getNextSibling();
+				}
+				ret.add(line);
+			}
+			lineNode = lineNode.getNextSibling();
+		}
+		return ret;
+	}
+	
 	/**
 	 * This method is called by Spoon when a step needs to serialize its configuration to a repository.
 	 * The repository implementation provides the necessary methods to save the step attributes.
@@ -106,6 +172,30 @@ public abstract class CoolStepMeta extends BaseStepMeta implements StepMetaInter
 	}		
 	
 	/**
+	 * saves a table data structure to the repo. untested!
+	 * @param data
+	 * @param dataUid
+	 * @param rep
+	 * @param metaStore
+	 * @param idTransformation
+	 * @param idStep
+	 * @throws KettleException
+	 */
+	public void saveTableToRep(ArrayList<HashMap<String, String>> data, String dataUid, Repository rep, IMetaStore metaStore, ObjectId idTransformation, ObjectId idStep) throws KettleException 
+	{
+		try {
+			Gson gson = new GsonBuilder().create();
+			rep.saveStepAttribute( idTransformation, idStep, dataUid + "_nr_lines", data.size() );
+			for ( int i = 0; i < data.size(); i++ ) {
+				  HashMap<String, String> line = data.get( i );
+				  rep.saveStepAttribute( idTransformation, idStep, i, "json_record", gson.toJson(line) );	
+		    }
+		} catch(Exception e){
+			throw new KettleException("Unable to save step into repository: "+idStep, e); 
+		}
+	}
+	
+	/**
 	 * This method is called by PDI when a step needs to read its configuration from a repository.
 	 * The repository implementation provides the necessary methods to read the step attributes.
 	 * 
@@ -125,6 +215,50 @@ public abstract class CoolStepMeta extends BaseStepMeta implements StepMetaInter
 		catch(Exception e){
 			throw new KettleException("Unable to load step from repository", e);
 		}
+	}
+	
+	/**
+	 * reads a table from the repository. untested
+	 * @param dataUid
+	 * @param rep
+	 * @param metaStore
+	 * @param idStep
+	 * @param databases
+	 * @return
+	 * @throws KettleException
+	 */
+	public ArrayList<HashMap<String, String>> readTableFromRep(String dataUid, Repository rep, IMetaStore metaStore, ObjectId idStep, List<DatabaseMeta> databases) throws KettleException  
+	{
+		ArrayList<HashMap<String, String>> ret = new ArrayList<HashMap<String, String>>();		
+		int nrLines = (int) rep.getStepAttributeInteger( idStep, dataUid + "_nr_lines" );
+			    
+	    for ( int i = 0; i < nrLines; i++ ) {
+	    	
+	    	String json = rep.getStepAttributeString( idStep, i, "json_record" );
+	    	JsonElement root = new JsonParser().parse(json);
+	    	HashMap<String, String> line = (HashMap<String, String>) new Gson().fromJson(root, Map.class);
+	        ret.add( line );
+	    }
+	    return ret;
+	}
+	      
+	/**
+	 * aids in deep cloning
+	 * @param data
+	 * @return
+	 */
+	public ArrayList<HashMap<String,String>> deepCloneTableData(ArrayList<HashMap<String,String>> data) {
+		ArrayList<HashMap<String,String>> clone = new ArrayList<HashMap<String,String>>();
+		
+		for (HashMap<String, String> line : data) {
+			HashMap<String, String> newLine = new HashMap<String, String>();
+			for (Map.Entry<String, String> entry : line.entrySet()) {
+				newLine.put( entry.getKey(), entry.getValue() != null ? entry.getValue().toString() : null);
+			}
+			clone.add(newLine);
+		  }
+		
+		return clone;
 	}
 	
 	/**

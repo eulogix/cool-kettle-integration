@@ -14,6 +14,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -26,6 +28,8 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepDialogInterface;
 import org.pentaho.di.ui.core.dialog.ErrorDialog;
+import org.pentaho.di.ui.core.widget.ColumnInfo;
+import org.pentaho.di.ui.core.widget.TableView;
 import org.pentaho.di.ui.core.widget.TextVar;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
@@ -85,8 +89,8 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 		controlTypes.put(name, type);
 	}
 	
-	protected Label addLabel(String stringToken, int middle, int margin, Control lastControl) {
-	    Label label = new Label( shell, SWT.RIGHT );
+	protected Label addLabel(String stringToken, Composite composite, int middle, int margin, Control lastControl) {
+	    Label label = new Label( composite, SWT.RIGHT );
 	    label.setText( BaseMessages.getString( PKG, stringToken ) );
 	    props.setLook( label );
 	    FormData fdLabel = new FormData();
@@ -97,14 +101,16 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 	    
 	    return label;
 	}
-	
 	protected Text addTextField(String name, Control lastControl) {
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;
+		return addTextField(name, lastControl, shell, middle, margin);
+	}
+	
+	protected Text addTextField(String name, Control lastControl, Composite composite, int middle, int margin) {
+		addLabel(messagesPrefix + ".Field." + name + ".Label", composite, middle, margin, lastControl);
 		
-		addLabel(messagesPrefix + ".Field." + name + ".Label", middle, margin, lastControl);
-		
-		Text field = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+		Text field = new Text(composite, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
 		props.setLook(field);
 		field.addModifyListener(globalListener);
 		FormData fdField = new FormData();
@@ -116,14 +122,38 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 		addControl(name, field, "TEXT");
 		return field;
 	}
-
+	
+	protected Button addCheckboxField(String name, Control lastControl) {
+		int middle = props.getMiddlePct();
+		int margin = Const.MARGIN;
+		return addCheckboxField(name, lastControl, shell, middle, margin);
+	}
+	
+	protected Button addCheckboxField(String name, Control lastControl, Composite composite, int middle, int margin) {
+		addLabel(messagesPrefix + ".Field." + name + ".Label", composite, middle, margin, lastControl);
+		
+		Button field = new Button(composite, SWT.CHECK );
+		props.setLook(field);
+		FormData fdField = new FormData();
+		fdField.left = new FormAttachment(middle, 0);
+		fdField.right = new FormAttachment(100, 0);
+		fdField.top = new FormAttachment(lastControl, margin);
+		field.setLayoutData(fdField);
+		
+		addControl(name, field, "CHECKBOX");
+		return field;
+	}
+	
 	protected TextVar addTextVarField(String name, Control lastControl) {
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;
+		return addTextVarField(name, lastControl, shell, middle, margin);
+	}
+	
+	protected TextVar addTextVarField(String name, Control lastControl, Composite composite, int middle, int margin) {
+		addLabel(messagesPrefix + ".Field." + name + ".Label", composite, middle, margin, lastControl);
 		
-		addLabel(messagesPrefix + ".Field." + name + ".Label", middle, margin, lastControl);
-		
-		TextVar field = new TextVar(transMeta, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+		TextVar field = new TextVar(transMeta, composite, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
 		field.setToolTipText( BaseMessages.getString( PKG, messagesPrefix + ".Field.textVars.Tooltip" ) );
 		props.setLook(field);
 		field.addModifyListener(globalListener);
@@ -136,15 +166,17 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 		addControl(name, field, "TEXTVAR");
 		return field;
 	}
-
 	
 	protected CCombo addStreamFieldSelector(String name, Control lastControl) {
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;
-		
-		addLabel(messagesPrefix + ".Field." + name + ".Label", middle, margin, lastControl);
+		return addStreamFieldSelector(name, lastControl, shell, middle, margin);
+	}
+	
+	protected CCombo addStreamFieldSelector(String name, Control lastControl, Composite composite, int middle, int margin) {
+		addLabel(messagesPrefix + ".Field." + name + ".Label", composite, middle, margin, lastControl);
 			 		
-	    CCombo field = new CCombo( shell, SWT.BORDER | SWT.READ_ONLY );
+	    CCombo field = new CCombo( composite, SWT.BORDER | SWT.READ_ONLY );
 	    props.setLook( field );
 	    field.setEditable( true );
 	    field.addModifyListener( globalListener );
@@ -173,10 +205,13 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 	protected CCombo addCoolEnvironmentSelector(String name, Control lastControl) {
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;
+		return addCoolEnvironmentSelector(name, lastControl, shell, middle, margin);
+	}
+	
+	protected CCombo addCoolEnvironmentSelector(String name, Control lastControl, Composite composite, int middle, int margin) {
+		addLabel(messagesPrefix + ".Field." + name + ".Label", composite, middle, margin, lastControl);
 		
-		addLabel(messagesPrefix + ".Field." + name + ".Label", middle, margin, lastControl);
-		
-		CCombo field = new CCombo( shell, SWT.SINGLE | SWT.READ_ONLY | SWT.BORDER );
+		CCombo field = new CCombo( composite, SWT.SINGLE | SWT.READ_ONLY | SWT.BORDER );
 
 	    ArrayList<KettleAppConfiguration> confs = this.getCoolEnvironment().getConfiguredCoolApps();
 		for(int i=0; i<confs.size(); i++) {
@@ -187,7 +222,7 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 	    props.setLook( field );
 	    FormData fdField = new FormData();
 	    fdField.left = new FormAttachment( middle, 0 );
-	    fdField.top = new FormAttachment( lastControl, 2 * margin );
+	    fdField.top = new FormAttachment( lastControl, margin );
 	    fdField.right = new FormAttachment( 100, 0 );
 	    field.setLayoutData( fdField );
 	    field.addSelectionListener( new SelectionAdapter() {
@@ -199,7 +234,7 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 	    addControl(name, field, "CCOMBO");
 	    return field;
 	}
-	
+		
 	protected void populateWithPreviousStepFields(CCombo combo) {
 			try {
 				String previousValue = combo.getText();
@@ -245,6 +280,25 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 				case "CCOMBO" 	: ((CCombo)controls.get(key)).setText(value); break;
 				case "TEXTVAR" 	: ((TextVar)controls.get(key)).setText(value); break;
 				case "TEXT" 	: ((Text)controls.get(key)).setText(value); break;	
+				case "CHECKBOX" : ((Button)controls.get(key)).setText(value); break;	
+			}			
+		}
+	}
+	
+	/**
+	 * populates the meta object with data coming from the UI
+	 */
+	protected void populateMeta() {
+		// Setting the  settings to the meta object
+		String key = "", value = "";
+		for (Map.Entry<String, Object> entry : meta.fields.entrySet()) {
+			key 	= entry.getKey();
+			value 	= entry.getValue().toString();
+			switch(controlTypes.get(key)) {
+				case "CCOMBO" 	: meta.fields.put(key, ((CCombo)controls.get(key)).getText()); break;
+				case "TEXTVAR" 	: meta.fields.put(key, ((TextVar)controls.get(key)).getText()); break;
+				case "TEXT" 	: meta.fields.put(key, ((Text)controls.get(key)).getText()); break;
+				case "CHECKBOX" : meta.fields.put(key, ((Button)controls.get(key)).getText()); break;
 			}			
 		}
 	}
@@ -269,17 +323,8 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 		// The "stepname" variable will be the return value for the open() method. 
 		// Setting to step name from the dialog control
 		stepname = wStepname.getText(); 
-		// Setting the  settings to the meta object
-		String key = "", value = "";
-		for (Map.Entry<String, Object> entry : meta.fields.entrySet()) {
-			key 	= entry.getKey();
-			value 	= entry.getValue().toString();
-			switch(controlTypes.get(key)) {
-				case "CCOMBO" 	: meta.fields.put(key, ((CCombo)controls.get(key)).getText()); break;
-				case "TEXTVAR" 	: meta.fields.put(key, ((TextVar)controls.get(key)).getText()); break;
-				case "TEXT" 	: meta.fields.put(key, ((Text)controls.get(key)).getText()); break;	
-			}			
-		}
+		
+		populateMeta();
 		
 		// close the SWT dialog window
 		dispose();

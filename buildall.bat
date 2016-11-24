@@ -7,3 +7,6 @@ cd ..
 cd file-get-properties
 call mvn clean install
 cd ..
+cd file-set-properties
+call mvn clean install
+cd ..

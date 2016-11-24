@@ -1,4 +1,4 @@
-package com.eulogix.cool.pentaho.steps.file_uploader;
+package com.eulogix.cool.pentaho.steps.file_set_properties;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
