@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.variables.Variables;
 
+import com.eulogix.cool.lib.App;
 import com.eulogix.cool.lib.KettleAppConfiguration;
 
 public class Environment {
@@ -56,5 +57,17 @@ public class Environment {
 		}
 		
 		return apps;
+	}
+	
+	public App getDefinedCoolApp(String name) {
+		App app = null;
+		
+		ArrayList<KettleAppConfiguration> confs = this.getConfiguredCoolApps();
+		for(int i=0; i<confs.size(); i++) {
+			if(confs.get(i).getName().equals(name)) {
+				return new App( confs.get(i).getUrl(), confs.get(i).getUser(), confs.get(i).getPassword());
+			}
+		}
+		return app;
 	}
 }
