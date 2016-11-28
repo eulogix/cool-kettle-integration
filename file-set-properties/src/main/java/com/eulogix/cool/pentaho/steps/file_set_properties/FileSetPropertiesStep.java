@@ -162,7 +162,7 @@ public class FileSetPropertiesStep extends CoolStep implements StepInterface {
 			String schemaName = environmentSubstitute( meta.fields.get("schemaName").toString() );
 			String actualSchema = environmentSubstitute( meta.fields.get("actualSchema").toString() );
 			String fileId = getFieldValue(r, meta.fields.get("fileId").toString()).toString();
-			boolean merge = meta.fields.get("merge") != null;
+			boolean merge = meta.fields.get("merge").equals("Y");
 			
 			System.out.println("MERGE:" + meta.fields.get("merge"));
 			

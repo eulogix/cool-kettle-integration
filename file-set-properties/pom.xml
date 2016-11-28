@@ -104,6 +104,8 @@
 					<tasks>
 						<copy file="target/uber-${artifactId}-${version}.jar"
 							tofile="C:\Pentaho\data-integration7\plugins\steps\${artifactId}\${artifactId}.jar" />
+						<copy file="target/uber-${artifactId}-${version}.jar"
+							tofile="C:\data\java\coolkettleintegration\dist\${artifactId}\${artifactId}.jar" />
 					</tasks>
 				</configuration>
 				<executions>

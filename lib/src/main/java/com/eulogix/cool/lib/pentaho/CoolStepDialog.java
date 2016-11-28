@@ -280,7 +280,7 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 				case "CCOMBO" 	: ((CCombo)controls.get(key)).setText(value); break;
 				case "TEXTVAR" 	: ((TextVar)controls.get(key)).setText(value); break;
 				case "TEXT" 	: ((Text)controls.get(key)).setText(value); break;	
-				case "CHECKBOX" : ((Button)controls.get(key)).setText(value); break;	
+				case "CHECKBOX" : ((Button)controls.get(key)).setSelection(value.equals("Y")); break;	
 			}			
 		}
 	}
@@ -298,7 +298,7 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 				case "CCOMBO" 	: meta.fields.put(key, ((CCombo)controls.get(key)).getText()); break;
 				case "TEXTVAR" 	: meta.fields.put(key, ((TextVar)controls.get(key)).getText()); break;
 				case "TEXT" 	: meta.fields.put(key, ((Text)controls.get(key)).getText()); break;
-				case "CHECKBOX" : meta.fields.put(key, ((Button)controls.get(key)).getText()); break;
+				case "CHECKBOX" : meta.fields.put(key, ((Button)controls.get(key)).getSelection() ? "Y" : "N" ); break;
 			}			
 		}
 	}
