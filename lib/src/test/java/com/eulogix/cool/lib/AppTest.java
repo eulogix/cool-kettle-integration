@@ -54,7 +54,7 @@ public class AppTest {
     public void testUploadFileFromFsAndProperties() throws IOException
     {
     	App app = this.getApp();
-    	String insertedId = app.uploadFile("core", "core", "account", "1", "eula.txt", "UNCATEGORIZED", "D:\\eula.1031.txt");
+    	String insertedId = app.uploadFile("core", "core", "account", "1", "eula.txt", "UNCATEGORIZED", "overwrite", "D:\\eula.1031.txt").get("id").getAsString();
     	Assert.assertTrue( insertedId != null);
     
     	JsonObject props = new JsonParser().parse("{\"jprop1\":\"jvalue1\",\"jprop2\":\"jvalue2\"}").getAsJsonObject();

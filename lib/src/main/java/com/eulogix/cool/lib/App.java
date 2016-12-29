@@ -56,7 +56,7 @@ public class App
 		return String.valueOf( response.getStatus() );
 	}
 	
-	public String uploadFile(String schemaName, String actualSchema, String tableName, String pk, String fileName, String category, byte[] fileContent) {
+	public JsonObject uploadFile(String schemaName, String actualSchema, String tableName, String pk, String fileName, String category, String collisionStrategy, byte[] fileContent) {
 		Client client = this.getClient();
 		
 		Form form = new Form();
@@ -67,6 +67,7 @@ public class App
 		form.add("fileName", fileName);
 		form.add("category", category);
 		form.add("fileContent",  Base64.getEncoder().encodeToString(fileContent));
+		form.add("collisionStrategy",  collisionStrategy);
 		  
 		WebResource webResource = client.resource(this.url + "/cool/api/files/upload");   
 		
@@ -78,16 +79,33 @@ public class App
 	    
 		if( response.getStatus() == 200) {	
 			JsonElement root = new JsonParser().parse(entity);
-			return root.getAsJsonObject().get("fileId").getAsString();
+			return root.getAsJsonObject();
 		}
 		
 		return null;
 	}
 	
-	public String uploadFile(String schemaName, String actualSchema, String tableName, String pk, String fileName, String category, String fileSystemPath) throws IOException {
+	public JsonObject uploadFile(String schemaName, String actualSchema, String tableName, String pk, String fileName, String category, String collisionStrategy, String fileSystemPath) throws IOException {
 		Path path = Paths.get(fileSystemPath);
 		byte[] fileContent = Files.readAllBytes(path);
-		return uploadFile(schemaName, actualSchema, tableName, pk, fileName, category, fileContent) ;
+		return uploadFile(schemaName, actualSchema, tableName, pk, fileName, category, collisionStrategy, fileContent);
+	}
+	
+	public boolean deleteFile(String schemaName, String actualSchema, String fileId) {
+		Client client = this.getClient();
+				
+		Form form = new Form();
+		form.add("schemaName", schemaName);
+		form.add("actualSchema", actualSchema);
+		form.add("fileId", fileId);
+		  
+		WebResource webResource = client.resource(this.url + "/cool/api/files/delete");   
+		
+		ClientResponse response = webResource.
+		     type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+		     .post(ClientResponse.class, form);
+		
+		return ( response.getStatus() == 200);
 	}
 	
 	public boolean setFileProperties(String schemaName, String actualSchema, String fileId, String properties, boolean merge) {

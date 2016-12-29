@@ -234,7 +234,34 @@ public abstract class CoolStepDialog extends BaseStepDialog implements StepDialo
 	    addControl(name, field, "CCOMBO");
 	    return field;
 	}
+	
+	protected CCombo addCCombo(String name, Control lastControl, ArrayList<String> values) {
+		int middle = props.getMiddlePct();
+		int margin = Const.MARGIN;
+		return addCCombo(name, lastControl, shell, middle, margin, values);
+	}
+	
+	protected CCombo addCCombo(String name, Control lastControl, Composite composite, int middle, int margin, ArrayList<String> values) {
+		addLabel(messagesPrefix + ".Field." + name + ".Label", composite, middle, margin, lastControl);
 		
+		CCombo field = new CCombo( composite, SWT.SINGLE | SWT.READ_ONLY | SWT.BORDER );
+
+		for(int i=0; i<values.size(); i++) {
+			field.add( values.get(i) );
+		}
+	    
+	    field.select( 0 ); // +1: starts at -1
+	    props.setLook( field );
+	    FormData fdField = new FormData();
+	    fdField.left = new FormAttachment( middle, 0 );
+	    fdField.top = new FormAttachment( lastControl, margin );
+	    fdField.right = new FormAttachment( 100, 0 );
+	    field.setLayoutData( fdField );
+	    
+	    addControl(name, field, "CCOMBO");
+	    return field;
+	}
+	
 	protected void populateWithPreviousStepFields(CCombo combo) {
 			try {
 				String previousValue = combo.getText();

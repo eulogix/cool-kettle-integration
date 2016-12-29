@@ -20,9 +20,8 @@
 *
 ******************************************************************************/
 
-package com.eulogix.cool.pentaho.steps.file_uploader;
+package com.eulogix.cool.pentaho.steps.file_delete;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -65,12 +64,12 @@ import com.eulogix.cool.lib.pentaho.CoolStepDialog;
  * - report whether the user changed any settings when confirming the dialog 
  * 
  */
-public class FileUploaderStepDialog extends CoolStepDialog implements StepDialogInterface {
+public class FileDeleteStepDialog extends CoolStepDialog implements StepDialogInterface {
 
 	// this is the object the stores the step's settings
 	// the dialog reads the settings from it when opening
 	// the dialog writes the settings to it when confirmed 
-	private FileUploaderStepMeta meta;
+	private FileDeleteStepMeta meta;
 
 	
 	/**
@@ -83,11 +82,11 @@ public class FileUploaderStepDialog extends CoolStepDialog implements StepDialog
 	 * @param transMeta	transformation description
 	 * @param sname		the step name
 	 */
-	public FileUploaderStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
+	public FileDeleteStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
 		super(parent, (BaseStepMeta) in, transMeta, sname);
-		meta = (FileUploaderStepMeta) in;
-		PKG = FileUploaderStepMeta.class;
-		messagesPrefix = "FileUploaderStep";		
+		meta = (FileDeleteStepMeta) in;
+		PKG = FileDeleteStepMeta.class;
+		messagesPrefix = "FileDeleteStep";		
 	}
 
 	/**
@@ -128,7 +127,7 @@ public class FileUploaderStepDialog extends CoolStepDialog implements StepDialog
 		formLayout.marginHeight = Const.FORM_MARGIN;
 
 		shell.setLayout(formLayout);
-		shell.setText(BaseMessages.getString(PKG, "FileUploaderStep.Shell.Title")); 
+		shell.setText(BaseMessages.getString(PKG, "FileGetPropertiesStep.Shell.Title")); 
 
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;
@@ -158,16 +157,7 @@ public class FileUploaderStepDialog extends CoolStepDialog implements StepDialog
 		    switch(entry.getKey()) {
 		    	case "coolEnvironment"  : lastControl = addCoolEnvironmentSelector(entry.getKey(), lastControl); break; 	
 		    	case "schemaName"		: lastControl = addTextField(entry.getKey(), lastControl); break;
-		    	case "pk"				:
-		    	case "fileName"			:
-		    	case "sourceFile"		: lastControl = addStreamFieldSelector(entry.getKey(), lastControl); break;
-		    	case "collisionStrategy": { 
-		    		ArrayList<String> strategies = new ArrayList<String>();
-		    		strategies.add("overwrite");
-		    		strategies.add("skip");
-		    		strategies.add("append");
-		    		lastControl = addCCombo(entry.getKey(), lastControl, strategies);
-		    		break;}
+		    	case "fileId"			: lastControl = addStreamFieldSelector(entry.getKey(), lastControl); break;
 		    	default: lastControl = addTextVarField(entry.getKey(), lastControl); break;
 		    }
 		}

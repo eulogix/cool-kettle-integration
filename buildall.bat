@@ -10,3 +10,10 @@ cd ..
 cd file-set-properties
 call mvn clean install
 cd ..
+cd file-delete
+call mvn clean install
+cd ..
+cd file-get-record
+call mvn clean install
+cd ..
+

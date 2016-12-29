@@ -20,10 +20,11 @@
 *
 ******************************************************************************/
 
-package com.eulogix.cool.pentaho.steps.file_uploader;
+package com.eulogix.cool.pentaho.steps.file_delete;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowDataUtil;
@@ -38,6 +39,7 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 
 import com.eulogix.cool.lib.App;
 import com.eulogix.cool.lib.KettleAppConfiguration;
+import com.eulogix.cool.lib.pentaho.CoolStep;
 import com.eulogix.cool.lib.pentaho.Environment;
 import com.google.gson.JsonObject;
 
@@ -61,7 +63,7 @@ import com.google.gson.JsonObject;
  * 
  */
 
-public class FileUploaderStep extends BaseStep implements StepInterface {
+public class FileDeleteStep extends CoolStep implements StepInterface {
 
 	/**
 	 * The constructor should simply pass on its arguments to the parent class.
@@ -72,7 +74,7 @@ public class FileUploaderStep extends BaseStep implements StepInterface {
 	 * @param t					transformation description
 	 * @param dis				transformation executing
 	 */
-	public FileUploaderStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
+	public FileDeleteStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
 		super(s, stepDataInterface, c, t, dis);
 	}
 	
@@ -97,8 +99,8 @@ public class FileUploaderStep extends BaseStep implements StepInterface {
 	 */
 	public boolean init(StepMetaInterface smi, StepDataInterface sdi) {
 		// Casting to step-specific implementation classes is safe
-		FileUploaderStepMeta meta = (FileUploaderStepMeta) smi;
-		FileUploaderStepData data = (FileUploaderStepData) sdi;
+		FileDeleteStepMeta meta = (FileDeleteStepMeta) smi;
+		FileDeleteStepData data = (FileDeleteStepData) sdi;
 
 		return super.init(meta, data);
 	}	
@@ -127,8 +129,8 @@ public class FileUploaderStep extends BaseStep implements StepInterface {
 	public boolean processRow(StepMetaInterface smi, StepDataInterface sdi) throws KettleException {
 
 		// safely cast the step settings (meta) and runtime info (data) to specific implementations 
-		FileUploaderStepMeta meta = (FileUploaderStepMeta) smi;
-		FileUploaderStepData data = (FileUploaderStepData) sdi;
+		FileDeleteStepMeta meta = (FileDeleteStepMeta) smi;
+		FileDeleteStepData data = (FileDeleteStepData) sdi;
 
 		// get incoming row, getRow() potentially blocks waiting for more rows, returns null if no more rows expected
 		Object[] r = getRow(); 
@@ -149,45 +151,23 @@ public class FileUploaderStep extends BaseStep implements StepInterface {
 			// use meta.getFields() to change it, so it reflects the output row structure 
 			meta.getFields(data.outputRowMeta, getStepname(), null, null, this, null, null);
 		}
-
-		// safely add the string "Hello World!" at the end of the output row
-		// the row array will be resized if necessary 
+		 
+		App app = new Environment(this).getDefinedCoolApp(meta.fields.get("coolEnvironment").toString());
 		
-		Environment coolEnvironment = new Environment(this);
-		App app = null;
-		
-		ArrayList<KettleAppConfiguration> confs = coolEnvironment.getConfiguredCoolApps();
-		for(int i=0; i<confs.size(); i++) {
-			if(confs.get(i).getName().equals(meta.fields.get("coolEnvironment"))) {
-				app = new App( confs.get(i).getUrl(), confs.get(i).getUser(), confs.get(i).getPassword());
-			}
-		}
 		if(app != null) {
 			
 			Object[] outputRow;
-			try {
-				JsonObject uploadedFile = app.uploadFile(
-						meta.fields.get("schemaName").toString(), 
-						environmentSubstitute( meta.fields.get("actualSchema").toString() ), 
-						environmentSubstitute( meta.fields.get("table").toString() ), 
-						getFieldValue(r, meta.fields.get("pk").toString()).toString(), 
-						getFieldValue(r, meta.fields.get("fileName").toString()).toString(), 
-						environmentSubstitute( meta.fields.get("category").toString() ),
-						meta.fields.get("collisionStrategy").toString(),
-						getFieldValue(r, meta.fields.get("sourceFile").toString()).toString());
-						
-				outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 3, uploadedFile.get("message").getAsString() );
-				outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 2, uploadedFile.get("id").getAsString() );
-				outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 1, uploadedFile.get("name").isJsonNull() ? "" : uploadedFile.get("name").getAsString() );
-				
-				// put the row to the output row stream
-				putRow(data.outputRowMeta, outputRow); 
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
+			
+			boolean deleted = app.deleteFile(
+					meta.fields.get("schemaName").toString(), 
+					environmentSubstitute( meta.fields.get("actualSchema").toString() ), 
+					getFieldValue(r, meta.fields.get("fileId").toString()).toString());
+					
+			outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 1, deleted );
+			
+			// put the row to the output row stream
+			putRow(data.outputRowMeta, outputRow); 
+			
 		} 
 	
 		// log progress if it is time to to so
@@ -220,8 +200,8 @@ public class FileUploaderStep extends BaseStep implements StepInterface {
 	public void dispose(StepMetaInterface smi, StepDataInterface sdi) {
 
 		// Casting to step-specific implementation classes is safe
-		FileUploaderStepMeta meta = (FileUploaderStepMeta) smi;
-		FileUploaderStepData data = (FileUploaderStepData) sdi;
+		FileDeleteStepMeta meta = (FileDeleteStepMeta) smi;
+		FileDeleteStepData data = (FileDeleteStepData) sdi;
 		
 		super.dispose(meta, data);
 	}
