@@ -20,8 +20,9 @@
 *
 ******************************************************************************/
 
-package com.eulogix.cool.pentaho.steps.file_get_record;
+package com.eulogix.cool.pentaho.steps.file_search;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -64,12 +65,12 @@ import com.eulogix.cool.lib.pentaho.CoolStepDialog;
  * - report whether the user changed any settings when confirming the dialog 
  * 
  */
-public class FileGetRecordStepDialog extends CoolStepDialog implements StepDialogInterface {
+public class FileSearchStepDialog extends CoolStepDialog implements StepDialogInterface {
 
 	// this is the object the stores the step's settings
 	// the dialog reads the settings from it when opening
 	// the dialog writes the settings to it when confirmed 
-	private FileGetRecordStepMeta meta;
+	private FileSearchStepMeta meta;
 
 	
 	/**
@@ -82,11 +83,11 @@ public class FileGetRecordStepDialog extends CoolStepDialog implements StepDialo
 	 * @param transMeta	transformation description
 	 * @param sname		the step name
 	 */
-	public FileGetRecordStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
+	public FileSearchStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
 		super(parent, (BaseStepMeta) in, transMeta, sname);
-		meta = (FileGetRecordStepMeta) in;
-		PKG = FileGetRecordStepMeta.class;
-		messagesPrefix = "FileGetRecordStep";		
+		meta = (FileSearchStepMeta) in;
+		PKG = FileSearchStepMeta.class;
+		messagesPrefix = "FileSearchStep";		
 	}
 
 	/**
@@ -127,7 +128,7 @@ public class FileGetRecordStepDialog extends CoolStepDialog implements StepDialo
 		formLayout.marginHeight = Const.FORM_MARGIN;
 
 		shell.setLayout(formLayout);
-		shell.setText(BaseMessages.getString(PKG, "FileGetPropertiesStep.Shell.Title")); 
+		shell.setText(BaseMessages.getString(PKG, "FileSearchStep.Shell.Title")); 
 
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;
@@ -157,10 +158,18 @@ public class FileGetRecordStepDialog extends CoolStepDialog implements StepDialo
 		    switch(entry.getKey()) {
 		    	case "coolEnvironment"  : lastControl = addCoolEnvironmentSelector(entry.getKey(), lastControl); break; 	
 		    	case "schemaName"		: lastControl = addTextField(entry.getKey(), lastControl); break;
-		    	case "fileId"			: lastControl = addStreamFieldSelector(entry.getKey(), lastControl); break;
+		    	case "pk"				: lastControl = addStreamFieldSelector(entry.getKey(), lastControl); break;
+		    	case "fetchContent": { 
+		    		ArrayList<String> fetchContent = new ArrayList<String>();
+		    		fetchContent.add("yes");
+		    		fetchContent.add("no");
+		    		lastControl = addCCombo(entry.getKey(), lastControl, fetchContent);
+		    		break;}
 		    	default: lastControl = addTextVarField(entry.getKey(), lastControl); break;
 		    }
 		}
+		
+
 				
 		// OK and cancel buttons
 		wOK = new Button(shell, SWT.PUSH);

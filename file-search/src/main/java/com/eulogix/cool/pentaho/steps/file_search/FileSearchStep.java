@@ -20,15 +20,17 @@
 *
 ******************************************************************************/
 
-package com.eulogix.cool.pentaho.steps.file_get_record;
+package com.eulogix.cool.pentaho.steps.file_search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Map;
 
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowDataUtil;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStep;
@@ -41,6 +43,9 @@ import com.eulogix.cool.lib.App;
 import com.eulogix.cool.lib.KettleAppConfiguration;
 import com.eulogix.cool.lib.pentaho.CoolStep;
 import com.eulogix.cool.lib.pentaho.Environment;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 /**
  * This class is part of the demo step plug-in implementation.
@@ -62,7 +67,7 @@ import com.eulogix.cool.lib.pentaho.Environment;
  * 
  */
 
-public class FileGetRecordStep extends CoolStep implements StepInterface {
+public class FileSearchStep extends CoolStep implements StepInterface {
 
 	/**
 	 * The constructor should simply pass on its arguments to the parent class.
@@ -73,7 +78,7 @@ public class FileGetRecordStep extends CoolStep implements StepInterface {
 	 * @param t					transformation description
 	 * @param dis				transformation executing
 	 */
-	public FileGetRecordStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
+	public FileSearchStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
 		super(s, stepDataInterface, c, t, dis);
 	}
 	
@@ -98,8 +103,8 @@ public class FileGetRecordStep extends CoolStep implements StepInterface {
 	 */
 	public boolean init(StepMetaInterface smi, StepDataInterface sdi) {
 		// Casting to step-specific implementation classes is safe
-		FileGetRecordStepMeta meta = (FileGetRecordStepMeta) smi;
-		FileGetRecordStepData data = (FileGetRecordStepData) sdi;
+		FileSearchStepMeta meta = (FileSearchStepMeta) smi;
+		FileSearchStepData data = (FileSearchStepData) sdi;
 
 		return super.init(meta, data);
 	}	
@@ -128,8 +133,8 @@ public class FileGetRecordStep extends CoolStep implements StepInterface {
 	public boolean processRow(StepMetaInterface smi, StepDataInterface sdi) throws KettleException {
 
 		// safely cast the step settings (meta) and runtime info (data) to specific implementations 
-		FileGetRecordStepMeta meta = (FileGetRecordStepMeta) smi;
-		FileGetRecordStepData data = (FileGetRecordStepData) sdi;
+		FileSearchStepMeta meta = (FileSearchStepMeta) smi;
+		FileSearchStepData data = (FileSearchStepData) sdi;
 
 		// get incoming row, getRow() potentially blocks waiting for more rows, returns null if no more rows expected
 		Object[] r = getRow(); 
@@ -157,19 +162,45 @@ public class FileGetRecordStep extends CoolStep implements StepInterface {
 			
 			String schemaName = environmentSubstitute( meta.fields.get("schemaName").toString() );
 			String actualSchema = environmentSubstitute( meta.fields.get("actualSchema").toString() );
-			String fileId = getFieldValue(r, meta.fields.get("fileId").toString()).toString();
+			String table = environmentSubstitute( meta.fields.get("table").toString() );
+			String pk = getFieldValueAsString(r, meta.fields.get("pk").toString());
+			String category = environmentSubstitute( meta.fields.get("category").toString() );
+			String fileName = environmentSubstitute( meta.fields.get("fileName").toString() );
+			int limit = Integer.parseInt( meta.fields.get("limit").toString() );
+			boolean fetchContent = meta.fields.get("fetchContent").toString().equals("yes");
 			
 			Object[] outputRow;
-
-			Map<String, Object> properties = app.getFilePropertiesAsMap(schemaName, actualSchema, fileId);
-			for (Map.Entry<String, Object> entry : properties.entrySet()) {
-			    String key = entry.getKey();
-			    Object value = entry.getValue();
-			    outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 2, key);
-			    outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 1, value);
-			    putRow(data.outputRowMeta, outputRow);
-			}
-
+			
+			JsonObject search;
+			JsonObject file;
+			JsonArray files;
+			
+			int page = 0, totalPages = 0;
+			do{
+				 search = app.searchFiles(schemaName, actualSchema, table, pk, category, fileName, fetchContent, page);
+				 totalPages = search.get("pages_count").getAsInt();
+				 files = search.get("files").getAsJsonArray();
+				 
+				 for(int i=0; i<files.size(); i++) {
+					 file = files.get(i).getAsJsonObject();
+					 
+					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 10, (long) file.get("file_id").getAsInt());
+					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 9, file.get("path").getAsString());
+					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 8, file.get("source_table").getAsString());
+					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 7, (long) file.get("source_table_id").getAsInt());
+					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 6, file.get("category").isJsonNull() ? null : file.get("category").getAsString());
+					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 5, file.get("file_name").getAsString());
+					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 4, file.get("file_size").isJsonNull() ? null : (long) file.get("file_size").getAsInt());
+					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 3, file.get("uploaded_by_user").isJsonNull() ? null : (long) file.get("uploaded_by_user").getAsInt());
+					 if (file.has("content")) {
+						 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 2,  file.get("content").isJsonNull() ? null : Base64.getDecoder().decode( file.get("content").getAsString() )) ;
+					 } else outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 2, null);
+					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 1, file.get("properties").isJsonNull() ? null : file.get("properties").getAsString());
+					 putRow(data.outputRowMeta, outputRow);
+				 }
+				 
+			} while(page++ < totalPages);
+				
 		} 
 	
 		// log progress if it is time to to so
@@ -182,7 +213,13 @@ public class FileGetRecordStep extends CoolStep implements StepInterface {
 	}
 	
 	public Object getFieldValue(Object[] rowData, String fieldName) {
-		return rowData[ getInputRowMeta().indexOfValue( fieldName ) ];
+		int idx = getInputRowMeta().indexOfValue( fieldName );
+		return idx == -1 ? null : rowData[ idx ];
+	}
+	
+	public String getFieldValueAsString(Object[] rowData, String fieldName) {
+		Object o = getFieldValue(rowData, fieldName);
+		return o == null ? null : o.toString();
 	}
 	
 	/**
@@ -202,8 +239,8 @@ public class FileGetRecordStep extends CoolStep implements StepInterface {
 	public void dispose(StepMetaInterface smi, StepDataInterface sdi) {
 
 		// Casting to step-specific implementation classes is safe
-		FileGetRecordStepMeta meta = (FileGetRecordStepMeta) smi;
-		FileGetRecordStepData data = (FileGetRecordStepData) sdi;
+		FileSearchStepMeta meta = (FileSearchStepMeta) smi;
+		FileSearchStepData data = (FileSearchStepData) sdi;
 		
 		super.dispose(meta, data);
 	}

@@ -20,7 +20,7 @@
 *
 ******************************************************************************/
 
-package com.eulogix.cool.pentaho.steps.file_get_record;
+package com.eulogix.cool.pentaho.steps.file_search;
 
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepData;
@@ -46,11 +46,11 @@ import org.pentaho.di.trans.step.StepDataInterface;
  * the data class. 
  *   
  */
-public class FileGetRecordStepData extends BaseStepData implements StepDataInterface {
+public class FileSearchStepData extends BaseStepData implements StepDataInterface {
 
 	public RowMetaInterface outputRowMeta;
 	
-    public FileGetRecordStepData()
+    public FileSearchStepData()
 	{
 		super();
 	}

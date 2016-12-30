@@ -127,7 +127,7 @@ public class FileDeleteStepDialog extends CoolStepDialog implements StepDialogIn
 		formLayout.marginHeight = Const.FORM_MARGIN;
 
 		shell.setLayout(formLayout);
-		shell.setText(BaseMessages.getString(PKG, "FileGetPropertiesStep.Shell.Title")); 
+		shell.setText(BaseMessages.getString(PKG, "FileDeleteStep.Shell.Title")); 
 
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;

@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.eulogix.cool.pentaho.steps</groupId>
-	<artifactId>file-get-record</artifactId>
+	<artifactId>file-search</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>file-get-record</name>
+	<name>file-search</name>
 	<url>http://maven.apache.org</url>
 	<repositories>
 		<repository>
@@ -127,7 +127,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/target/classes/com/eulogix/cool/pentaho/steps/file_get_record/messages</outputDirectory>
+							<outputDirectory>${basedir}/target/classes/com/eulogix/cool/pentaho/steps/file_search/messages</outputDirectory>
 							<includeEmptyDirs>true</includeEmptyDirs>
 							<resources>
 								<resource>

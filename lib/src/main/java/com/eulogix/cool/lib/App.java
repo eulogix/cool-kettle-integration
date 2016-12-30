@@ -56,6 +56,35 @@ public class App
 		return String.valueOf( response.getStatus() );
 	}
 	
+	public JsonObject searchFiles(String schemaName, String actualSchema, String tableName, String pk, String category, String fileName, boolean fetchContent, int page) {
+		Client client = this.getClient();
+		
+		Form form = new Form();
+		form.add("schemaName", schemaName);
+		form.add("actualSchema", actualSchema);
+		form.add("table", tableName);
+		form.add("pk", pk);
+		form.add("category", category);
+		form.add("name", fileName);
+		form.add("page", page);
+		form.add("fetchContent", fetchContent ? "true" : "false");
+		  
+		WebResource webResource = client.resource(this.url + "/cool/api/files/search");   
+		
+		ClientResponse response = webResource.
+		     type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+		     .post(ClientResponse.class, form);
+		
+	    String entity = response.getEntity(String.class);
+	    
+		if( response.getStatus() == 200) {	
+			JsonElement root = new JsonParser().parse(entity);
+			return root.getAsJsonObject();
+		}
+		
+		return null;
+	}
+	
 	public JsonObject uploadFile(String schemaName, String actualSchema, String tableName, String pk, String fileName, String category, String collisionStrategy, byte[] fileContent) {
 		Client client = this.getClient();
 		

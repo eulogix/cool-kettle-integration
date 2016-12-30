@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.eulogix.cool.lib.App;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -13,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.pentaho.di.core.row.RowDataUtil;
 
 import junit.framework.Assert;
 
@@ -77,5 +79,28 @@ public class AppTest {
     	Assert.assertEquals("jvalue3", retrievedProps.get("jprop3"));
     	
     }
+    
+    /*@Test
+    public void testSearchFiles() throws IOException
+    {
+    	App app = this.getApp();
+    	
+    	JsonObject search;
+		JsonObject file;
+		JsonArray files;
+		
+		int totalPages, page = 0;
+		
+    	search = app.searchFiles("core", "core", null, null, null, null, page);
+    	System.out.println( search );
+		totalPages = search.get("pages_count").getAsInt();
+		files = search.get("files").getAsJsonArray();
+		 
+		 for(int i=0; i<files.size(); i++) {
+			 file = files.get(i).getAsJsonObject();
+			 System.out.println(file.get("file_id").getAsString() + " " + file.get("file_name").getAsString() + " " + file.get("path").getAsString());
+		 }
+    	
+    }*/
     
 }

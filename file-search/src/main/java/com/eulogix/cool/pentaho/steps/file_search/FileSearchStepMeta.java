@@ -1,5 +1,6 @@
-package com.eulogix.cool.pentaho.steps.file_get_record;
+package com.eulogix.cool.pentaho.steps.file_search;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.eclipse.swt.widgets.Shell;
@@ -22,26 +23,26 @@ import org.pentaho.metastore.api.IMetaStore;
 import com.eulogix.cool.lib.pentaho.CoolStepMeta;
 
 @Step(	
-		id = "CoolFileGetRecordStep",
-		image = "file-get-record.png",
-		i18nPackageName="com.eulogix.cool.pentaho.steps.file_get_record",
-		name="FileGetRecordStep.Name",
-		description = "FileGetRecordStep.TooltipDesc",
-		categoryDescription="FileGetRecordStep.Category"
+		id = "CoolFileSearchStep",
+		image = "file-search.png",
+		i18nPackageName="com.eulogix.cool.pentaho.steps.file_search",
+		name="FileSearchStep.Name",
+		description = "FileSearchStep.TooltipDesc",
+		categoryDescription="FileSearchStep.Category"
 )
-public class FileGetRecordStepMeta extends CoolStepMeta implements StepMetaInterface {
+public class FileSearchStepMeta extends CoolStepMeta implements StepMetaInterface {
 
 	/**
 	 *	The PKG member is used when looking up internationalized strings.
 	 *	The properties file with localized keys is expected to reside in 
 	 *	{the package of the class specified}/messages/messages_{locale}.properties   
 	 */
-	private static Class<?> PKG = FileGetRecordStepMeta.class; // for i18n purposes
+	private static Class<?> PKG = FileSearchStepMeta.class; // for i18n purposes
 	
 	/**
 	 * Constructor should call super() to make sure the base class has a chance to initialize properly.
 	 */
-	public FileGetRecordStepMeta() {
+	public FileSearchStepMeta() {
 		super();
 	}
 	
@@ -50,7 +51,12 @@ public class FileGetRecordStepMeta extends CoolStepMeta implements StepMetaInter
 		fields.put("coolEnvironment", "");
 		fields.put("schemaName", "");
 		fields.put("actualSchema", "");
-		fields.put("fileId", "");
+		fields.put("table", "");
+		fields.put("pk", "");
+		fields.put("category", "");
+		fields.put("fileName", "");
+		fields.put("limit", "");
+		fields.put("fetchContent", "");
 	}
 	
 	/**
@@ -64,7 +70,7 @@ public class FileGetRecordStepMeta extends CoolStepMeta implements StepMetaInter
 	 * @return 			new instance of a dialog for this step 
 	 */
 	public StepDialogInterface getDialog(Shell shell, StepMetaInterface meta, TransMeta transMeta, String name) {
-		return new FileGetRecordStepDialog(shell, meta, transMeta, name);
+		return new FileSearchStepDialog(shell, meta, transMeta, name);
 	}
 
 	/**
@@ -79,14 +85,14 @@ public class FileGetRecordStepMeta extends CoolStepMeta implements StepMetaInter
 	 * @return						the new instance of a step implementation 
 	 */
 	public StepInterface getStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int cnr, TransMeta transMeta, Trans disp) {
-		return new FileGetRecordStep(stepMeta, stepDataInterface, cnr, transMeta, disp);
+		return new FileSearchStep(stepMeta, stepDataInterface, cnr, transMeta, disp);
 	}
 
 	/**
 	 * Called by PDI to get a new instance of the step data class.
 	 */
 	public StepDataInterface getStepData() {
-		return new FileGetRecordStepData();
+		return new FileSearchStepData();
 	}	
 
 	/**
@@ -96,6 +102,8 @@ public class FileGetRecordStepMeta extends CoolStepMeta implements StepMetaInter
 	public void setDefault() {
 		fields.put("schemaName", "core");
 		fields.put("actualSchema", "core");
+		fields.put("limit", "0");
+		fields.put("fetchContent", "no");
 	}
 
 	/**
@@ -109,7 +117,7 @@ public class FileGetRecordStepMeta extends CoolStepMeta implements StepMetaInter
 	 * @return a deep copy of this
 	 */
 	public Object clone() {
-		FileGetRecordStepMeta retval = (FileGetRecordStepMeta) super.clone();
+		FileSearchStepMeta retval = (FileSearchStepMeta) super.clone();
 		retval.setUpFields();
 		return retval;
 	}
@@ -129,20 +137,27 @@ public class FileGetRecordStepMeta extends CoolStepMeta implements StepMetaInter
 	 * @param metaStore			the metaStore to optionally read from
 	 */
 	public void getFields(RowMetaInterface inputRowMeta, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space, Repository repository, IMetaStore metaStore) throws KettleStepException{
-
-		/*
-		 * This implementation appends the outputField to the row-stream
-		 */
-
-		ValueMetaInterface pName = new ValueMeta("propertyName", ValueMeta.TYPE_STRING);
-		pName.setTrimType(ValueMeta.TRIM_TYPE_BOTH);
-		pName.setOrigin(name);		// the name of the step that adds this field  
-		inputRowMeta.addValueMeta(pName);
 		
-		ValueMetaInterface pValue = new ValueMeta("propertyValue", ValueMeta.TYPE_STRING);
-		pName.setTrimType(ValueMeta.TRIM_TYPE_BOTH);
-		pName.setOrigin(name);		// the name of the step that adds this field  
-		inputRowMeta.addValueMeta(pValue);		
+		ArrayList<ValueMetaInterface> metas = new ArrayList<ValueMetaInterface>(); 
+
+		// a value meta object contains the meta data for a field
+		metas.add( new ValueMeta("file_id", ValueMeta.TYPE_INTEGER) );
+		metas.add( new ValueMeta("path", ValueMeta.TYPE_STRING) );
+		metas.add( new ValueMeta("source_table", ValueMeta.TYPE_STRING) );
+		metas.add( new ValueMeta("source_table_id", ValueMeta.TYPE_INTEGER) );
+		metas.add( new ValueMeta("category", ValueMeta.TYPE_STRING) );
+		metas.add( new ValueMeta("file_name", ValueMeta.TYPE_STRING) );
+		metas.add( new ValueMeta("file_size", ValueMeta.TYPE_INTEGER) );
+		metas.add( new ValueMeta("uploaded_by_user", ValueMeta.TYPE_INTEGER) );
+		metas.add( new ValueMeta("content", ValueMeta.TYPE_BINARY) );
+		metas.add( new ValueMeta("json_properties", ValueMeta.TYPE_STRING) );
+
+		for(int i=0;i<metas.size();i++) {
+			metas.get(i).setTrimType(ValueMeta.TRIM_TYPE_BOTH);
+			metas.get(i).setOrigin(name);
+			inputRowMeta.addValueMeta(metas.get(i));
+		}
+
 	}
 
 }

@@ -154,7 +154,6 @@ public class FileUploaderStepMeta extends CoolStepMeta implements StepMetaInterf
 	 */
 	public void getFields(RowMetaInterface inputRowMeta, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space, Repository repository, IMetaStore metaStore) throws KettleStepException{
 
-		
 		ArrayList<ValueMetaInterface> metas = new ArrayList<ValueMetaInterface>(); 
 
 		// a value meta object contains the meta data for a field

@@ -97,7 +97,7 @@ public class FileSetPropertiesStepDialog extends CoolStepDialog implements StepD
     formLayout.marginHeight = Const.FORM_MARGIN;
 
     shell.setLayout( formLayout );
-    shell.setText( BaseMessages.getString( PKG, "FileSetProperties.Shell.Title" ) );
+    shell.setText( BaseMessages.getString( PKG, "FileSetPropertiesStep.Shell.Title" ) );
 
     int middle = props.getMiddlePct();
     int margin = Const.MARGIN;

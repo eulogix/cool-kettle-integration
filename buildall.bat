@@ -13,7 +13,7 @@ cd ..
 cd file-delete
 call mvn clean install
 cd ..
-cd file-get-record
+cd file-search
 call mvn clean install
 cd ..
 

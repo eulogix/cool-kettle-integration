@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>file-get-record</name>
+	<name>file-search</name>
 	<comment></comment>
 	<projects>
 		<project>lib</project>

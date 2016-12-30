@@ -1,4 +1,4 @@
-package com.eulogix.cool.pentaho.steps.file_get_record;
+package com.eulogix.cool.pentaho.steps.file_search;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
