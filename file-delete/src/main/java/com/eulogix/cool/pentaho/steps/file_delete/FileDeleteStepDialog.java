@@ -156,9 +156,8 @@ public class FileDeleteStepDialog extends CoolStepDialog implements StepDialogIn
 		for (Map.Entry<String, Object> entry : meta.fields.entrySet()) {
 		    switch(entry.getKey()) {
 		    	case "coolEnvironment"  : lastControl = addCoolEnvironmentSelector(entry.getKey(), lastControl); break; 	
-		    	case "schemaName"		: lastControl = addTextField(entry.getKey(), lastControl); break;
-		    	case "fileId"			: lastControl = addStreamFieldSelector(entry.getKey(), lastControl); break;
-		    	default: lastControl = addTextVarField(entry.getKey(), lastControl); break;
+		    	default: lastControl = addStreamFieldSelector(entry.getKey(), lastControl); break;
+		    	//default: lastControl = addTextVarField(entry.getKey(), lastControl); break;
 		    }
 		}
 				

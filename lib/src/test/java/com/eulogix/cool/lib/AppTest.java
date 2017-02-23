@@ -91,7 +91,8 @@ public class AppTest {
 		
 		int totalPages, page = 0;
 		
-    	search = app.searchFiles("core", "core", null, null, null, null, page);
+    	search = app.searchFiles("core", "core", null, null, "UNCATEGORIZED", null, true, page);
+    	    	 
     	System.out.println( search );
 		totalPages = search.get("pages_count").getAsInt();
 		files = search.get("files").getAsJsonArray();

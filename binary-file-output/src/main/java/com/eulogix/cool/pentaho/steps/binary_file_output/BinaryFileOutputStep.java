@@ -20,12 +20,14 @@
 *
 ******************************************************************************/
 
-package com.eulogix.cool.pentaho.steps.file_delete;
+package com.eulogix.cool.pentaho.steps.binary_file_output;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowDataUtil;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -63,7 +65,7 @@ import com.google.gson.JsonObject;
  * 
  */
 
-public class FileDeleteStep extends CoolStep implements StepInterface {
+public class BinaryFileOutputStep extends CoolStep implements StepInterface {
 
 	/**
 	 * The constructor should simply pass on its arguments to the parent class.
@@ -74,7 +76,7 @@ public class FileDeleteStep extends CoolStep implements StepInterface {
 	 * @param t					transformation description
 	 * @param dis				transformation executing
 	 */
-	public FileDeleteStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
+	public BinaryFileOutputStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
 		super(s, stepDataInterface, c, t, dis);
 	}
 	
@@ -99,8 +101,8 @@ public class FileDeleteStep extends CoolStep implements StepInterface {
 	 */
 	public boolean init(StepMetaInterface smi, StepDataInterface sdi) {
 		// Casting to step-specific implementation classes is safe
-		FileDeleteStepMeta meta = (FileDeleteStepMeta) smi;
-		FileDeleteStepData data = (FileDeleteStepData) sdi;
+		BinaryFileOutputStepMeta meta = (BinaryFileOutputStepMeta) smi;
+		BinaryFileOutputStepData data = (BinaryFileOutputStepData) sdi;
 
 		return super.init(meta, data);
 	}	
@@ -129,8 +131,8 @@ public class FileDeleteStep extends CoolStep implements StepInterface {
 	public boolean processRow(StepMetaInterface smi, StepDataInterface sdi) throws KettleException {
 
 		// safely cast the step settings (meta) and runtime info (data) to specific implementations 
-		FileDeleteStepMeta meta = (FileDeleteStepMeta) smi;
-		FileDeleteStepData data = (FileDeleteStepData) sdi;
+		BinaryFileOutputStepMeta meta = (BinaryFileOutputStepMeta) smi;
+		BinaryFileOutputStepData data = (BinaryFileOutputStepData) sdi;
 
 		// get incoming row, getRow() potentially blocks waiting for more rows, returns null if no more rows expected
 		Object[] r = getRow(); 
@@ -151,31 +153,25 @@ public class FileDeleteStep extends CoolStep implements StepInterface {
 			// use meta.getFields() to change it, so it reflects the output row structure 
 			meta.getFields(data.outputRowMeta, getStepname(), null, null, this, null, null);
 		}
-		 
-		App app = new Environment(this).getDefinedCoolApp(meta.fields.get("coolEnvironment").toString());
+		 	
+		Object[] outputRow;
 		
-		if(app != null) {
+		try {
+			String completePath = getFieldValue(r, meta.fields.get("folder").toString()).toString() 
+					+ File.separator 
+					+ getFieldValue(r, meta.fields.get("fileName").toString()).toString();
 			
-			Object[] outputRow;
+			FileUtils.writeByteArrayToFile(new File(completePath), (byte[]) getFieldValue(r, meta.fields.get("fileContent").toString()));
+			outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 1, true );
+		} catch (IOException e) {
+			e.printStackTrace();
+			outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 1, false );
+		}
+		
+		// put the row to the output row stream
+		putRow(data.outputRowMeta, outputRow); 
 			
-			/*boolean deleted = app.deleteFile(
-					meta.fields.get("schemaName").toString(), 
-					environmentSubstitute( meta.fields.get("actualSchema").toString() ), 
-					getFieldValue(r, meta.fields.get("fileId").toString()).toString());*/
-			
-			boolean deleted = app.deleteFile(
-					getFieldValue(r, meta.fields.get("schemaName").toString()).toString(),
-					getFieldValue(r, meta.fields.get("actualSchema").toString()).toString(),
-					getFieldValue(r, meta.fields.get("fileId").toString()).toString()
-				);
-			
-			
-			outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 1, deleted );
-			
-			// put the row to the output row stream
-			putRow(data.outputRowMeta, outputRow); 
-			
-		} 
+		 
 	
 		// log progress if it is time to to so
 		if (checkFeedback(getLinesRead())) {
@@ -207,8 +203,8 @@ public class FileDeleteStep extends CoolStep implements StepInterface {
 	public void dispose(StepMetaInterface smi, StepDataInterface sdi) {
 
 		// Casting to step-specific implementation classes is safe
-		FileDeleteStepMeta meta = (FileDeleteStepMeta) smi;
-		FileDeleteStepData data = (FileDeleteStepData) sdi;
+		BinaryFileOutputStepMeta meta = (BinaryFileOutputStepMeta) smi;
+		BinaryFileOutputStepData data = (BinaryFileOutputStepData) sdi;
 		
 		super.dispose(meta, data);
 	}

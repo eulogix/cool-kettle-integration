@@ -27,7 +27,7 @@ public class Grid {
 	private LinkedHashMap<String, ColumnInfo> columnsInfo = new LinkedHashMap<String, ColumnInfo>();
 	
 	public Grid() {
-		
+			
 	}
 	
 	public void addColumn(String name, ColumnInfo colInfo) {
@@ -93,8 +93,10 @@ public class Grid {
 
 	public void setData(ArrayList<HashMap<String, String>> data) {
 		getTable().table.removeAll();
+		int i = 1;
 		  for (HashMap<String, String> line : data) {
 			TableItem item = new TableItem(getTable().table, SWT.NONE);
+			item.setText(0, Integer.toString(i++));
 			for (Map.Entry<String, String> entry : line.entrySet()) {
 				if(entry.getValue() != null)
 					item.setText( 1+(Integer) getColumnIndex( entry.getKey() ), entry.getValue().toString());
@@ -111,11 +113,12 @@ public class Grid {
 		for ( int i = 0; i < getTable().table.getItemCount(); i++ ) { //rows
 			  TableItem item = getTable().table.getItem( i );
 			  HashMap<String,String> rowData = new HashMap<String,String>();
-			  for( int j = 1; j < getTable().table.getColumnCount(); j++) { //cols
-				  rowData.put(
-						  getColumnName(j-1).toString()
-						  , item.getText(j));
-			  }
+			  for( int j = 1; j < getTable().table.getColumnCount(); j++) {
+					  //cols
+					  rowData.put(
+							  getColumnName(j-1).toString()
+							  , item.getText(j));
+				  }
 			  ret.add(rowData);
 	      }
 		return ret;

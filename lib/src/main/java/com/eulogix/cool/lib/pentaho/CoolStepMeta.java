@@ -79,19 +79,21 @@ public abstract class CoolStepMeta extends BaseStepMeta implements StepMetaInter
 	 */
 	protected String getTableXML(String tagName, ArrayList<HashMap<String,String>> data) {
 		StringBuilder retval = new StringBuilder(300);
+		String xmlLine;
 		
-		retval.append( "    <" + tagName + ">" ).append( Const.CR );
+		retval.append( "<" + tagName + ">" ).append( Const.CR );
 	    
 		for ( HashMap<String, String> line : data ) {
-			retval.append( "      <line> " );
+			retval.append("<line>" );
 			
 			for (Map.Entry<String, String> entry : line.entrySet()) {
-			    retval.append( XMLHandler.addTagValue(entry.getKey(), entry.getValue() != null ? entry.getValue().toString() : null));
+				xmlLine = XMLHandler.addTagValue(entry.getKey(), entry.getValue() != null ? entry.getValue().toString() : null);
+			    retval.append(xmlLine);
 			}
 	      
-	      retval.append( " </line>" ).append( Const.CR );
+	      retval.append( "</line>" ).append( Const.CR );
 	    }
-	    retval.append( "    </" + tagName + ">" ).append( Const.CR );
+	    retval.append( "</" + tagName + ">" ).append( Const.CR );
 	    
 	    return retval.toString();
 	}
@@ -139,8 +141,8 @@ public abstract class CoolStepMeta extends BaseStepMeta implements StepMetaInter
 				HashMap<String, String> line = new HashMap<String, String>();
 				Node itemNode = lineNode.getFirstChild();
 				while (itemNode != null) {
-					line.put(itemNode.getNodeName(),
-							XMLHandler.getNodeValue(itemNode));
+					if(itemNode.getNodeType() == Node.ELEMENT_NODE)
+						line.put(itemNode.getNodeName(), XMLHandler.getNodeValue(itemNode));
 					itemNode = itemNode.getNextSibling();
 				}
 				ret.add(line);

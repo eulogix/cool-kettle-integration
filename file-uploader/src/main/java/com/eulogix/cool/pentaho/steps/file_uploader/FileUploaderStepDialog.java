@@ -157,10 +157,6 @@ public class FileUploaderStepDialog extends CoolStepDialog implements StepDialog
 		for (Map.Entry<String, Object> entry : meta.fields.entrySet()) {
 		    switch(entry.getKey()) {
 		    	case "coolEnvironment"  : lastControl = addCoolEnvironmentSelector(entry.getKey(), lastControl); break; 	
-		    	case "schemaName"		: lastControl = addTextField(entry.getKey(), lastControl); break;
-		    	case "pk"				:
-		    	case "fileName"			:
-		    	case "sourceFile"		: lastControl = addStreamFieldSelector(entry.getKey(), lastControl); break;
 		    	case "collisionStrategy": { 
 		    		ArrayList<String> strategies = new ArrayList<String>();
 		    		strategies.add("overwrite");
@@ -168,7 +164,7 @@ public class FileUploaderStepDialog extends CoolStepDialog implements StepDialog
 		    		strategies.add("append");
 		    		lastControl = addCCombo(entry.getKey(), lastControl, strategies);
 		    		break;}
-		    	default: lastControl = addTextVarField(entry.getKey(), lastControl); break;
+		    	default: lastControl = addStreamFieldSelector(entry.getKey(), lastControl); break;
 		    }
 		}
 				

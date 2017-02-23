@@ -155,8 +155,8 @@ public class FileGetPropertiesStep extends CoolStep implements StepInterface {
 		
 		if(app != null) {
 			
-			String schemaName = environmentSubstitute( meta.fields.get("schemaName").toString() );
-			String actualSchema = environmentSubstitute( meta.fields.get("actualSchema").toString() );
+			String schemaName = getFieldValue(r, meta.fields.get("schemaName").toString()).toString();
+			String actualSchema = getFieldValue(r, meta.fields.get("actualSchema").toString()).toString();
 			String fileId = getFieldValue(r, meta.fields.get("fileId").toString()).toString();
 			
 			Object[] outputRow;

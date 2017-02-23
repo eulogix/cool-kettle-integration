@@ -20,9 +20,8 @@
 *
 ******************************************************************************/
 
-package com.eulogix.cool.pentaho.steps.file_search;
+package com.eulogix.cool.pentaho.steps.binary_file_output;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -65,12 +64,12 @@ import com.eulogix.cool.lib.pentaho.CoolStepDialog;
  * - report whether the user changed any settings when confirming the dialog 
  * 
  */
-public class FileSearchStepDialog extends CoolStepDialog implements StepDialogInterface {
+public class BinaryFileOutputStepDialog extends CoolStepDialog implements StepDialogInterface {
 
 	// this is the object the stores the step's settings
 	// the dialog reads the settings from it when opening
 	// the dialog writes the settings to it when confirmed 
-	private FileSearchStepMeta meta;
+	private BinaryFileOutputStepMeta meta;
 
 	
 	/**
@@ -83,11 +82,11 @@ public class FileSearchStepDialog extends CoolStepDialog implements StepDialogIn
 	 * @param transMeta	transformation description
 	 * @param sname		the step name
 	 */
-	public FileSearchStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
+	public BinaryFileOutputStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
 		super(parent, (BaseStepMeta) in, transMeta, sname);
-		meta = (FileSearchStepMeta) in;
-		PKG = FileSearchStepMeta.class;
-		messagesPrefix = "FileSearchStep";		
+		meta = (BinaryFileOutputStepMeta) in;
+		PKG = BinaryFileOutputStepMeta.class;
+		messagesPrefix = "BinaryFileOutputStep";		
 	}
 
 	/**
@@ -128,7 +127,7 @@ public class FileSearchStepDialog extends CoolStepDialog implements StepDialogIn
 		formLayout.marginHeight = Const.FORM_MARGIN;
 
 		shell.setLayout(formLayout);
-		shell.setText(BaseMessages.getString(PKG, "FileSearchStep.Shell.Title")); 
+		shell.setText(BaseMessages.getString(PKG, "BinaryFileOutputStep.Shell.Title")); 
 
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;
@@ -157,17 +156,10 @@ public class FileSearchStepDialog extends CoolStepDialog implements StepDialogIn
 		for (Map.Entry<String, Object> entry : meta.fields.entrySet()) {
 		    switch(entry.getKey()) {
 		    	case "coolEnvironment"  : lastControl = addCoolEnvironmentSelector(entry.getKey(), lastControl); break; 	
-		    	case "fetchContent": { 
-		    		ArrayList<String> fetchContent = new ArrayList<String>();
-		    		fetchContent.add("yes");
-		    		fetchContent.add("no");
-		    		lastControl = addCCombo(entry.getKey(), lastControl, fetchContent);
-		    		break;}
 		    	default: lastControl = addStreamFieldSelector(entry.getKey(), lastControl); break;
+		    	//default: lastControl = addTextVarField(entry.getKey(), lastControl); break;
 		    }
 		}
-		
-
 				
 		// OK and cancel buttons
 		wOK = new Button(shell, SWT.PUSH);

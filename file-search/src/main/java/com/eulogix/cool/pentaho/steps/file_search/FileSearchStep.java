@@ -160,12 +160,12 @@ public class FileSearchStep extends CoolStep implements StepInterface {
 		
 		if(app != null) {
 			
-			String schemaName = environmentSubstitute( meta.fields.get("schemaName").toString() );
-			String actualSchema = environmentSubstitute( meta.fields.get("actualSchema").toString() );
-			String table = environmentSubstitute( meta.fields.get("table").toString() );
+			String schemaName = getFieldValueAsString(r, meta.fields.get("schemaName").toString());
+			String actualSchema = getFieldValueAsString(r, meta.fields.get("actualSchema").toString());
+			String table = getFieldValueAsString(r, meta.fields.get("table").toString());
 			String pk = getFieldValueAsString(r, meta.fields.get("pk").toString());
-			String category = environmentSubstitute( meta.fields.get("category").toString() );
-			String fileName = environmentSubstitute( meta.fields.get("fileName").toString() );
+			String category = getFieldValueAsString(r, meta.fields.get("category").toString());
+			String fileName = getFieldValueAsString(r, meta.fields.get("fileName").toString());
 			int limit = Integer.parseInt( meta.fields.get("limit").toString() );
 			boolean fetchContent = meta.fields.get("fetchContent").toString().equals("yes");
 			
@@ -185,17 +185,20 @@ public class FileSearchStep extends CoolStep implements StepInterface {
 					 file = files.get(i).getAsJsonObject();
 					 
 					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 10, (long) file.get("file_id").getAsInt());
-					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 9, file.get("path").getAsString());
-					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 8, file.get("source_table").getAsString());
-					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 7, (long) file.get("source_table_id").getAsInt());
-					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 6, file.get("category").isJsonNull() ? null : file.get("category").getAsString());
-					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 5, file.get("file_name").getAsString());
-					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 4, file.get("file_size").isJsonNull() ? null : (long) file.get("file_size").getAsInt());
-					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 3, file.get("uploaded_by_user").isJsonNull() ? null : (long) file.get("uploaded_by_user").getAsInt());
+					 outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 9, file.get("path").getAsString());
+					 outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 8, file.get("source_table").getAsString());
+					 outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 7, (long) file.get("source_table_id").getAsInt());
+					 outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 6, file.get("category").isJsonNull() ? null : file.get("category").getAsString());
+					 outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 5, file.get("file_name").getAsString());
+					 outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 4, file.get("file_size").isJsonNull() ? null : (long) file.get("file_size").getAsInt());
+					 outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 3, file.get("uploaded_by_user").isJsonNull() ? null : (long) file.get("uploaded_by_user").getAsInt());
+					 
 					 if (file.has("content")) {
-						 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 2,  file.get("content").isJsonNull() ? null : Base64.getDecoder().decode( file.get("content").getAsString() )) ;
-					 } else outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 2, null);
-					 outputRow = RowDataUtil.addValueData(r, data.outputRowMeta.size() - 1, file.get("properties").isJsonNull() ? null : file.get("properties").getAsString());
+						 outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 2,  file.get("content").isJsonNull() ? null : Base64.getDecoder().decode( file.get("content").getAsString() )) ;
+					 } else outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 2, null);
+					 
+					 outputRow = RowDataUtil.addValueData(outputRow, data.outputRowMeta.size() - 1, file.get("properties").isJsonNull() ? null : file.get("properties").getAsString());
+					 
 					 putRow(data.outputRowMeta, outputRow);
 				 }
 				 

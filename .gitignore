@@ -1,1 +1,4 @@
 dist/
+.metadata/
+binary-file-output/.settings/
+.recommenders/

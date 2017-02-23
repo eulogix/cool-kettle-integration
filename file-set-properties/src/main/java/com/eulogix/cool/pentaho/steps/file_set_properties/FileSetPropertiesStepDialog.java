@@ -155,10 +155,9 @@ public class FileSetPropertiesStepDialog extends CoolStepDialog implements StepD
 	for (Map.Entry<String, Object> entry : meta.fields.entrySet()) {
 	    switch(entry.getKey()) {
 	    	case "coolEnvironment"  : lastControl = addCoolEnvironmentSelector(entry.getKey(), lastControl, gSettings, middle, margin * 2); break; 	
-	    	case "schemaName"		: lastControl = addTextField(entry.getKey(), lastControl, gSettings, middle, margin * 2); break;
-	    	case "fileId"			: lastControl = addStreamFieldSelector(entry.getKey(), lastControl, gSettings, middle, margin * 2); break;
 	    	case "merge"			: lastControl = addCheckboxField(entry.getKey(), lastControl, gSettings, middle, margin * 2); break;
-	    	default: lastControl = addTextVarField(entry.getKey(), lastControl, gSettings, middle, margin * 2); break;
+	    	default: lastControl = addStreamFieldSelector(entry.getKey(), lastControl, gSettings, middle, margin * 2); break;
+	    	//default: lastControl = addTextVarField(entry.getKey(), lastControl, gSettings, middle, margin * 2); break;
 	    }
 	}  
 

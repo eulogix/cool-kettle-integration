@@ -167,12 +167,12 @@ public class FileUploaderStep extends BaseStep implements StepInterface {
 			Object[] outputRow;
 			try {
 				JsonObject uploadedFile = app.uploadFile(
-						meta.fields.get("schemaName").toString(), 
-						environmentSubstitute( meta.fields.get("actualSchema").toString() ), 
-						environmentSubstitute( meta.fields.get("table").toString() ), 
+						getFieldValue(r, meta.fields.get("schemaName").toString()).toString(),
+						getFieldValue(r, meta.fields.get("actualSchema").toString()).toString(),
+						getFieldValue(r, meta.fields.get("table").toString()).toString(),
 						getFieldValue(r, meta.fields.get("pk").toString()).toString(), 
 						getFieldValue(r, meta.fields.get("fileName").toString()).toString(), 
-						environmentSubstitute( meta.fields.get("category").toString() ),
+						getFieldValue(r, meta.fields.get("category").toString()).toString(),
 						meta.fields.get("collisionStrategy").toString(),
 						getFieldValue(r, meta.fields.get("sourceFile").toString()).toString());
 						
