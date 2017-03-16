@@ -104,4 +104,11 @@ public class AppTest {
     	
     }*/
     
+    @Test
+    public void testSendNotification() throws IOException
+    {
+    	App app = this.getApp();
+    	boolean notificationSent = app.sendNotification(1, "Java test", "hams_test", "");
+    	Assert.assertTrue( notificationSent );    	
+    }
 }

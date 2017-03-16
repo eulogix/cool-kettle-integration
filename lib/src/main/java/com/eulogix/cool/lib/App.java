@@ -197,6 +197,24 @@ public class App
 		return null;
 	}
 	
+	public boolean sendNotification(int userId, String message, String context, String jsonData) {
+		Client client = this.getClient();
+				
+		Form form = new Form();
+		form.add("userId", userId);
+		form.add("message", message);
+		form.add("context", context);
+		form.add("jsonData", jsonData);
+				  
+		WebResource webResource = client.resource(this.url + "/cool/api/notifications/sendUserNotification");   
+		
+		ClientResponse response = webResource.
+		     type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+		     .post(ClientResponse.class, form);
+		
+		return ( response.getStatus() == 200);
+	}
+	
 	private Client getClient() {
 		HTTPBasicAuthFilter basicAuthentication = new HTTPBasicAuthFilter(this.userName, this.password);
 		

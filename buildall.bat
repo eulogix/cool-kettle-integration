@@ -16,6 +16,9 @@ cd ..
 cd file-search
 call mvn clean install
 cd ..
+cd notification-send
+call mvn clean install
+cd ..
 cd binary-file-output
 call mvn clean install
 cd ..
