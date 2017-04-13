@@ -80,7 +80,7 @@ public class AppTest {
     	
     }
     
-    /*@Test
+    @Test
     public void testSearchFiles() throws IOException
     {
     	App app = this.getApp();
@@ -102,7 +102,7 @@ public class AppTest {
 			 System.out.println(file.get("file_id").getAsString() + " " + file.get("file_name").getAsString() + " " + file.get("path").getAsString());
 		 }
     	
-    }*/
+    }
     
     @Test
     public void testSendNotification() throws IOException

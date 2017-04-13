@@ -82,6 +82,8 @@ public class App
 			return root.getAsJsonObject();
 		}
 		
+		System.out.println(entity);
+		
 		return null;
 	}
 	
