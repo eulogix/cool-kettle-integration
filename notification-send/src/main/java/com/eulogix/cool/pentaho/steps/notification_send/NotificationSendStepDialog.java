@@ -71,7 +71,6 @@ public class NotificationSendStepDialog extends CoolStepDialog implements StepDi
 	// the dialog writes the settings to it when confirmed 
 	private NotificationSendStepMeta meta;
 
-	
 	/**
 	 * The constructor should simply invoke super() and save the incoming meta
 	 * object to a local variable, so it can conveniently read and write settings

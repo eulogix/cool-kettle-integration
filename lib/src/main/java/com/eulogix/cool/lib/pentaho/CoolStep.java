@@ -6,7 +6,9 @@ import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.StepDataInterface;
 import org.pentaho.di.trans.step.StepMeta;
 
-public abstract class CoolStep extends BaseStep {
+import com.eulogix.kettle.lib.EasyStep;
+
+public abstract class CoolStep extends EasyStep {
 	
 	/**
 	 * The constructor should simply pass on its arguments to the parent class.
