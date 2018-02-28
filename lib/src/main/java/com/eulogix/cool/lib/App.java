@@ -11,26 +11,27 @@ import java.util.Map;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import com.sun.jersey.api.representation.Form;
-import com.sun.jersey.client.apache.ApacheHttpClient;
-import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
+import com.eulogix.cool.lib.api.FileRepositoryApi;
+import com.eulogix.cool.lib.api.TemplatesApi;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import com.sun.jersey.api.representation.Form;
+import com.sun.jersey.client.apache.ApacheHttpClient;
 
 
 public class App 
 {
-	private String
-	url, userName, password;
+	private String url, userName, password;
+	
+	private FileRepositoryApi fileRepositoryApi;
+	private TemplatesApi templatesApi;
 	
 	public App(String url, String userName, String password) {
 		this.url = url;
@@ -38,6 +39,18 @@ public class App
 		this.password = password;
 	}
 	
+	public FileRepositoryApi getFileRepositoryApi() {
+		if(fileRepositoryApi == null)
+			fileRepositoryApi = new FileRepositoryApi(this);
+		return fileRepositoryApi;
+	}
+	
+	public TemplatesApi getTemplatesApi() {
+		if(templatesApi == null)
+			templatesApi = new TemplatesApi(this);
+		return templatesApi;
+	}
+
 	public String getApiVersion() {
 		Client client = this.getClient();
 		
@@ -82,8 +95,6 @@ public class App
 			return root.getAsJsonObject();
 		}
 		
-		System.out.println(entity);
-		
 		return null;
 	}
 	
@@ -107,6 +118,8 @@ public class App
 		     .post(ClientResponse.class, form);
 		
 	    String entity = response.getEntity(String.class);
+	    
+	    System.out.println(entity);
 	    
 		if( response.getStatus() == 200) {	
 			JsonElement root = new JsonParser().parse(entity);
@@ -217,7 +230,7 @@ public class App
 		return ( response.getStatus() == 200);
 	}
 	
-	private Client getClient() {
+	public Client getClient() {
 		HTTPBasicAuthFilter basicAuthentication = new HTTPBasicAuthFilter(this.userName, this.password);
 		
 		Client client = ApacheHttpClient.create();
@@ -225,4 +238,8 @@ public class App
 		
 		return client;
 	}
+	
+	public String getApiUrl(String relativeUrl) {
+		return this.url + relativeUrl;
+	} 
 }
